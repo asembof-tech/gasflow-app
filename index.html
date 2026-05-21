@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>GasFlow NG - LPG Sales Manager</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, -apple-system, 'Helvetica Neue', sans-serif;
+      background: #f4f7f2;
+      color: #1e2a1e;
+      padding-bottom: 70px;
+    }
+
+    /* Theme: Green, White, Orange */
+    :root {
+      --primary: #2e7d32;
+      --primary-dark: #1b5e20;
+      --orange: #f57c00;
+      --orange-light: #fff3e0;
+      --white: #ffffff;
+      --gray-bg: #f0f2ee;
+      --text-dark: #1f2a1b;
+      --border: #d0d6c7;
+      --credit: #e65100;
+      --profit: #2b7a2b;
+    }
+
+    /* Dark mode */
+    body.dark {
+      background: #121212;
+      color: #e0e0e0;
+    }
+    body.dark .card, body.dark .modal-content, body.dark .top-bar, body.dark .nav-bottom {
+      background: #1e1e1e;
+      color: #e0e0e0;
+      border-color: #333;
+    }
+    body.dark .stat-card, body.dark .table-container {
+      background: #2a2a2a;
+    }
+    body.dark button.secondary {
+      background: #333;
+      color: white;
+    }
+
+    .top-bar {
+      background: var(--primary);
+      color: white;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    .logo {
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+    .logo span {
+      color: #ffb74d;
+    }
+    .role-badge {
+      background: rgba(255,255,255,0.2);
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-size: 0.75rem;
+    }
+    .nav-bottom {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 6px 12px;
+      border-top: 1px solid var(--border);
+      z-index: 10;
+    }
+    body.dark .nav-bottom {
+      background: #1e1e1e;
+    }
+    .nav-item {
+      text-align: center;
+      font-size: 0.7rem;
+      flex: 1;
+      color: #5c6b4b;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .nav-item.active {
+      color: var(--primary);
+      font-weight: bold;
+    }
+    .nav-item i {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .container {
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    .stat-card {
+      background: #f9faf7;
+      border-radius: 18px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--primary-dark);
+    }
+    .stat-label {
+      font-size: 0.75rem;
+      color: #4a5b3c;
+    }
+    .alert {
+      background: #fff1e0;
+      border-left: 4px solid var(--orange);
+      padding: 10px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+    }
+    button, .btn {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+    }
+    button.secondary {
+      background: #e9ece5;
+      color: #2e5c2e;
+    }
+    button.orange {
+      background: var(--orange);
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 12px;
+      margin: 6px 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: white;
+      font-size: 1rem;
+    }
+    .flex-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .cylinder-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 8px 0;
+    }
+    .cylinder-btn {
+      background: #eef2e8;
+      color: #1e3a1e;
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .table-container {
+      overflow-x: auto;
+      background: white;
+      border-radius: 18px;
+      padding: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    th, td {
+      padding: 10px 6px;
+      text-align: left;
+      border-bottom: 1px solid #e2e6dc;
+    }
+    .badge-credit {
+      background: #ffedd5;
+      color: #b45309;
+      border-radius: 30px;
+      padding: 2px 10px;
+      font-size: 0.7rem;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 20;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 32px;
+      padding: 20px;
+    }
+    .text-small {
+      font-size: 0.7rem;
+    }
+    .profit-text {
+      color: var(--profit);
+      font-weight: bold;
+    }
+    hr {
+      margin: 12px 0;
+    }
+    @media (max-width: 480px) {
+      .stat-number { font-size: 1.3rem; }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="loginScreen" class="modal" style="display: flex;">
+  <div class="modal-content">
+    <h2 style="color: var(--primary);">⛽ GasFlow NG</h2>
+    <p>LPG Retail Manager</p>
+    <input type="text" id="loginUsername" placeholder="Username (owner/staff)" autocomplete="off">
+    <input type="password" id="loginPassword" placeholder="Password">
+    <button id="loginBtn">Login</button>
+    <p class="text-small" style="margin-top:12px;">demo: owner/owner123 | staff/staff123</p>
+  </div>
+</div>
+
+<div id="mainApp" style="display: none;">
+  <div class="top-bar">
+    <div class="logo">GasFlow <span>NG</span></div>
+    <div style="display: flex; gap: 8px;">
+      <i id="darkModeToggle" class="fas fa-moon" style="font-size:1.2rem; cursor:pointer;"></i>
+      <span class="role-badge" id="roleBadge"></span>
+      <i id="logoutBtn" class="fas fa-sign-out-alt" style="font-size:1.2rem; cursor:pointer;"></i>
+    </div>
+  </div>
+
+  <div class="container" id="pageContent"></div>
+
+  <div class="nav-bottom">
+    <div class="nav-item" data-page="dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></div>
+    <div class="nav-item" data-page="sales"><i class="fas fa-cash-register"></i><span>Sale</span></div>
+    <div class="nav-item" data-page="inventory"><i class="fas fa-gas-pump"></i><span>Stock</span></div>
+    <div class="nav-item" data-page="customers"><i class="fas fa-users"></i><span>Credit</span></div>
+    <div class="nav-item" data-page="expenses"><i class="fas fa-receipt"></i><span>Expenses</span></div>
+    <div class="nav-item" data-page="reports"><i class="fas fa-chart-line"></i><span>Reports</span></div>
+  </div>
+</div>
+
+<script>
+  // ---------- DATA SCHEMA & STORAGE ----------
+  let currentUser = { username: '', role: '' }; // owner / staff
+  let appData = {
+    config: { costPricePerKg: 550, lowStockAlert: 50 },
+    inventory: { currentStockKg: 210, movements: [] },
+    sales: [],
+    expenses: [],
+    customers: [], // { id, name, phone }
+    creditTransactions: [] // { id, customerId, date, type, amount, description, saleId? }
+  };
+  
+  function loadData() {
+    const saved = localStorage.getItem('gasflow_ng_data');
+    if(saved) {
+      try {
+        let parsed = JSON.parse(saved);
+        appData = { ...appData, ...parsed };
+        if(!appData.creditTransactions) appData.creditTransactions = [];
+        if(!appData.customers) appData.customers = [];
+      } catch(e) {}
+    } else initSampleData();
+    updateOutstandingBalances(); // compute derived
+  }
+  function saveData() { localStorage.setItem('gasflow_ng_data', JSON.stringify(appData)); }
+  
+  function initSampleData() {
+    appData.inventory.currentStockKg = 215.5;
+    appData.inventory.movements = [{ date: new Date().toISOString(), type: 'opening', qty: 215.5, note: 'Initial stock' }];
+    appData.config.costPricePerKg = 540;
+    const sampleCust = { id: 'c1', name: 'Adebayo Stores', phone: '08012345678' };
+    appData.customers = [sampleCust];
+    appData.creditTransactions = [
+      { id: 'ct1', customerId: 'c1', date: new Date().toISOString(), type: 'sale', amount: 12500, description: 'Credit sale 12.5kg' }
+    ];
+    appData.sales = [{
+      id: 's1', date: new Date().toISOString(), customerName: 'Adebayo Stores', customerPhone: '08012345678', quantityKg: 12.5,
+      pricePerKg: 1000, totalAmount: 12500, profit: (1000-540)*12.5, paymentMethod: 'credit', costPriceAtSale: 540
+    }];
+    appData.expenses = [{ id: 'e1', date: new Date().toISOString(), category: 'Transport', amount: 3000, note: 'Delivery' }];
+    saveData();
+  }
+  
+  function updateOutstandingBalances() {
+    // compute each customer debt
+    appData.customers.forEach(c => { c.outstandingBalance = 0; });
+    appData.creditTransactions.forEach(tx => {
+      const cust = appData.customers.find(c => c.id === tx.customerId);
+      if(cust) {
+        if(tx.type === 'sale') cust.outstandingBalance += tx.amount;
+        else if(tx.type === 'payment') cust.outstandingBalance -= tx.amount;
+      }
+    });
+  }
+  
+  // Helper: add sale
+  function addSale(saleObj) {
+    // reduce stock
+    let newStock = appData.inventory.currentStockKg - saleObj.quantityKg;
+    if(newStock < 0) { alert("Insufficient stock!"); return false; }
+    appData.inventory.currentStockKg = newStock;
+    appData.inventory.movements.push({ date: new Date().toISOString(), type: 'sale', qty: -saleObj.quantityKg, ref: saleObj.id });
+    appData.sales.push(saleObj);
+    // if credit
+    if(saleObj.paymentMethod === 'credit' && saleObj.customerId) {
+      appData.creditTransactions.push({
+        id: 'tx_'+Date.now()+Math.random(), customerId: saleObj.customerId, date: saleObj.date,
+        type: 'sale', amount: saleObj.totalAmount, description: `Sale ${saleObj.quantityKg}kg`, saleId: saleObj.id
+      });
+      updateOutstandingBalances();
+    }
+    saveData();
+    return true;
+  }
+  
+  function addExpense(expense) { appData.expenses.push(expense); saveData(); }
+  function addStockDelivery(kg, note) { appData.inventory.currentStockKg += kg; appData.inventory.movements.push({ date: new Date().toISOString(), type: 'delivery', qty: kg, note }); saveData(); }
+  function addCustomer(name, phone) { const newId = 'c'+Date.now(); appData.customers.push({ id: newId, name, phone, outstandingBalance: 0 }); saveData(); return newId; }
+  function recordPayment(customerId, amount, note) {
+    if(amount <= 0) return;
+    appData.creditTransactions.push({ id: 'pay_'+Date.now(), customerId, date: new Date().toISOString(), type: 'payment', amount, description: note });
+    updateOutstandingBalances();
+    saveData();
+  }
+  
+  // Currency formatter
+  const formatNgn = (val) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(val);
+  
+  // helper profit / sales summary
+  function getTodayStart() { let d = new Date(); d.setHours(0,0,0,0); return d.toISOString(); }
+  function getSalesByDateRange(startDate, endDate) { return appData.sales.filter(s => s.date >= startDate && s.date <= endDate); }
+  
+  // ---- Rendering pages based on role ----
+  let currentPage = 'dashboard';
+  let profitChart = null;
+  
+  function renderPage() {
+    const container = document.getElementById('pageContent');
+    if(!container) return;
+    if(currentPage === 'dashboard') renderDashboard(container);
+    else if(currentPage === 'sales') renderSales(container);
+    else if(currentPage === 'inventory') renderInventory(container);
+    else if(currentPage === 'customers') renderCustomersCredit(container);
+    else if(currentPage === 'expenses') renderExpenses(container);
+    else if(currentPage === 'reports') renderReports(container);
+    // highlight nav
+    document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('active'); if(el.dataset.page === currentPage) el.classList.add('active'); });
+  }
+  
+  function renderDashboard(container) {
+    const todayISO = new Date().toISOString().split('T')[0];
+    const todaySales = appData.sales.filter(s => s.date.split('T')[0] === todayISO);
+    const todayRevenue = todaySales.reduce((sum,s)=>sum+s.totalAmount,0);
+    const todayProfit = todaySales.reduce((sum,s)=>sum+(s.profit||0),0);
+    const todayExpenses = appData.expenses.filter(e => e.date.split('T')[0] === todayISO).reduce((sum,e)=>sum+e.amount,0);
+    const netProfit = todayProfit - todayExpenses;
+    const totalDebt = appData.customers.reduce((sum,c)=>sum+(c.outstandingBalance||0),0);
+    const stock = appData.inventory.currentStockKg;
+    const lowStockAlert = stock < appData.config.lowStockAlert;
+    const recentSales = [...appData.sales].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+    let html = `<div class="alert ${lowStockAlert ? 'alert' : ''}" style="${lowStockAlert?'':'display:none'}">⚠️ Low stock! Only ${stock} kg left. Reorder soon.</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-number">${stock.toFixed(1)} kg</div><div class="stat-label">Current Stock</div></div>
+        <div class="stat-card"><div class="stat-number">${formatNgn(todayRevenue)}</div><div class="stat-label">Today's Sales</div></div>
+        <div class="stat-card"><div class="stat-number profit-text">${formatNgn(netProfit)}</div><div class="stat-label">Today's Net Profit</div></div>
+        <div class="stat-card"><div class="stat-number" style="color:#e65100;">${formatNgn(totalDebt)}</div><div class="stat-label">Total Debt</div></div>
+      </div>
+      <div class="card"><h3>📋 Recent Transactions</h3><div class="table-container"><table><tr><th>Time</th><th>Customer</th><th>Kg</th><th>Amount</th></tr>${recentSales.map(s=>`<tr><td>${new Date(s.date).toLocaleTimeString()}</td><td>${s.customerName||'Walk-in'}</td><td>${s.quantityKg}</td><td>${formatNgn(s.totalAmount)}</td></tr>`).join('')||'<tr><td colspan="4">No sales today</td></tr>'}</table></div></div>`;
+    container.innerHTML = html;
+  }
+  
+  function renderSales(container) {
+    const cylinders = [{label:"1kg",kg:1},{label:"3kg",kg:3},{label:"5kg",kg:5},{label:"6kg",kg:6},{label:"12.5kg",kg:12.5},{label:"25kg",kg:25},{label:"50kg",kg:50}];
+    const customers = appData.customers;
+    let html = `<div class="card"><h3>⛽ New Gas Sale</h3>
+      <label>Customer (optional)</label><input type="text" id="custName" placeholder="Customer name">
+      <label>Phone (optional)</label><input type="tel" id="custPhone">
+      <label>Quantity (kg)</label><input type="number" id="qtyKg" step="any" value="5">
+      <div class="cylinder-buttons">${cylinders.map(c=>`<button type="button" class="cylinder-btn" data-kg="${c.kg}">${c.label}</button>`).join('')}</div>
+      <label>Price per kg (₦)</label><input type="number" id="priceKg" value="900" step="50">
+      <label>Payment Method</label><select id="payMethod"><option value="cash">Cash</option><option value="transfer">Transfer</option><option value="POS">POS</option><option value="credit">Credit</option></select>
+      <div id="creditCustomerDiv" style="display:none;"><label>Select Credit Customer</label><select id="creditCustId"><option value="">--New Customer--</option>${customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}</select><button type="button" id="newCustomerBtn" class="secondary" style="margin-top:4px;">+ New Customer</button></div>
+      <button id="recordSaleBtn">💨 Record Sale</button>
+      </div>
+      <div class="card"><h3>📈 Today's Sales</h3><div id="todaySalesList"></div></div>`;
+    container.innerHTML = html;
+    document.querySelectorAll('.cylinder-btn').forEach(btn => btn.addEventListener('click', (e) => { document.getElementById('qtyKg').value = btn.dataset.kg; }));
+    const paySelect = document.getElementById('payMethod');
+    const creditDiv = document.getElementById('creditCustomerDiv');
+    paySelect.addEventListener('change', () => { creditDiv.style.display = paySelect.value === 'credit' ? 'block' : 'none'; });
+    document.getElementById('recordSaleBtn').addEventListener('click', () => {
+      const custName = document.getElementById('custName').value.trim() || "Walk-in";
+      const custPhone = document.getElementById('custPhone').value.trim();
+      let qty = parseFloat(document.getElementById('qtyKg').value);
+      const price = parseFloat(document.getElementById('priceKg').value);
+      if(isNaN(qty) || qty<=0 || isNaN(price)) return alert("Enter valid quantity & price");
+      const total = qty * price;
+      const payMethod = paySelect.value;
+      let customerId = null;
+      if(payMethod === 'credit') {
+        let selectedId = document.getElementById('creditCustId').value;
+        if(selectedId === "") {
+          let newName = prompt("New customer name");
+          if(!newName) return;
+          let newPhone = prompt("Phone number");
+          customerId = addCustomer(newName, newPhone || "");
+        } else customerId = selectedId;
+        if(customerId) {
+          const custObj = appData.customers.find(c=>c.id===customerId);
+          if(!custObj) return;
+          document.getElementById('custName').value = custObj.name;
+        }
+      }
+      const saleRecord = {
+        id: 's'+Date.now(), date: new Date().toISOString(), customerName: custName, customerPhone: custPhone,
+        quantityKg: qty, pricePerKg: price, totalAmount: total, profit: (price - appData.config.costPricePerKg)*qty,
+        paymentMethod: payMethod, costPriceAtSale: appData.config.costPricePerKg, customerId
+      };
+      if(addSale(saleRecord)) { alert(`Sale recorded: ${formatNgn(total)}`); renderPage(); } else alert("Failed, insufficient stock");
+    });
+    // refresh today sales
+    function showToday() {
+      const today = new Date().toISOString().split('T')[0];
+      const todaySales = appData.sales.filter(s=>s.date.split('T')[0]===today);
+      const listDiv = document.getElementById('todaySalesList');
+      if(listDiv) listDiv.innerHTML = `<table>${todaySales.map(s=>`<tr><td>${s.quantityKg}kg</td><td>${formatNgn(s.totalAmount)}</td><td>${s.paymentMethod}</td></tr>`).join('')||'<tr><td>No sales yet</td></tr>'}</table>`;
+    }
+    showToday();
+    if(document.getElementById('newCustomerBtn')) document.getElementById('newCustomerBtn').addEventListener('click',()=>{ let n=prompt("Name"),p=prompt("Phone"); if(n) addCustomer(n,p); renderSales(container); });
+  }
+  
+  function renderInventory(container) {
+    if(currentUser.role !== 'owner') { container.innerHTML = `<div class="card">⚠️ Only owner can manage inventory.</div>`; return; }
+    const stock = appData.inventory.currentStockKg;
+    let html = `<div class="card"><h3>📦 LPG Stock Management</h3><div style="font-size:1.6rem; font-weight:bold;">${stock.toFixed(1)} kg</div>
+      <div class="alert ${stock<appData.config.lowStockAlert?'':'hidden'}" style="background:#ffe6cc;">Low stock alert: < ${appData.config.lowStockAlert} kg</div>
+      <label>Add Delivery / Refill (kg)</label><input type="number" id="addStockKg" step="any" placeholder="Kilograms"><button id="addStockBtn">➕ Add Stock</button>
+      <hr><label>Update Cost Price (₦/kg)</label><input type="number" id="costPriceInput" value="${appData.config.costPricePerKg}"><button id="updateCostBtn">Update Cost</button>
+      <hr><label>Low Stock Threshold (kg)</label><input type="number" id="thresholdInput" value="${appData.config.lowStockAlert}"><button id="updateThresholdBtn">Set Alert</button>
+      </div><div class="card"><h3>Stock Movements</h3><div class="table-container"><table>${appData.inventory.movements.slice(-10).reverse().map(m=>`<tr><td>${new Date(m.date).toLocaleString()}</td><td>${m.type}</td><td>${m.qty} kg</td></tr>`).join('')}</table></div></div>`;
+    container.innerHTML = html;
+    document.getElementById('addStockBtn')?.addEventListener('click',()=>{ let kg=parseFloat(document.getElementById('addStockKg').value); if(kg>0){ addStockDelivery(kg, 'manual'); renderPage(); } else alert("Valid kg"); });
+    document.getElementById('updateCostBtn')?.addEventListener('click',()=>{ let val=parseFloat(document.getElementById('costPriceInput').value); if(val>0){ appData.config.costPricePerKg=val; saveData(); alert("Cost updated"); renderPage(); } });
+    document.getElementById('updateThresholdBtn')?.addEventListener('click',()=>{ let th=parseFloat(document.getElementById('thresholdInput').value); if(th>=0){ appData.config.lowStockAlert=th; saveData(); renderPage(); } });
+  }
+  
+  function renderCustomersCredit(container) {
+    let totalDebt = appData.customers.reduce((s,c)=>s+(c.outstandingBalance||0),0);
+    let html = `<div class="card"><h3>💰 Credit Overview</h3><div class="stat-number" style="color:var(--credit)">${formatNgn(totalDebt)}</div><p>Total Outstanding</p>
+      <button id="newCustomerCreditBtn" class="secondary">+ Add Customer</button></div>
+      <div class="card"><h3>📋 Customers & Debts</h3><div class="table-container"><table><tr><th>Name</th><th>Phone</th><th>Debt (₦)</th><th>Action</th></tr>${appData.customers.map(c=>`<tr><td>${c.name}</td><td>${c.phone||'-'}</td><td>${formatNgn(c.outstandingBalance||0)}</td><td><button class="payBtn secondary" data-id="${c.id}" style="padding:4px 10px;">Pay</button><button class="remindBtn" data-phone="${c.phone}" data-name="${c.name}" style="margin-left:6px;"><i class="fab fa-whatsapp"></i></button></td></tr>`).join('')}</table></div></div>
+      <div class="card"><h3>Credit Transactions</h3><div class="table-container"><table>${appData.creditTransactions.slice().reverse().slice(0,15).map(tx=>`<tr><td>${new Date(tx.date).toLocaleDateString()}</td><td>${tx.type}</td><td>${formatNgn(tx.amount)}</td><td>${tx.description||''}</td></tr>`).join('')}</table></div></div>`;
+    container.innerHTML = html;
+    document.querySelectorAll('.payBtn').forEach(btn => btn.addEventListener('click', (e) => { let cid = btn.dataset.id; let amt = prompt("Payment amount (₦)"); if(amt && !isNaN(parseFloat(amt))) { recordPayment(cid, parseFloat(amt), "Payment received"); renderPage(); } }));
+    document.querySelectorAll('.remindBtn').forEach(btn => { btn.addEventListener('click', (e) => { let phone = btn.dataset.phone; let name = btn.dataset.name; if(phone) { let msg = `Hello ${name}, kindly settle your LPG credit balance. Thank you - GasFlow NG`; window.open(`https://wa.me/${phone.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`, '_blank'); } else alert("No phone number for reminder"); }); });
+    document.getElementById('newCustomerCreditBtn')?.addEventListener('click',()=>{ let n=prompt("Customer name"); if(n) addCustomer(n, prompt("Phone")||""); renderPage(); });
+  }
+  
+  function renderExpenses(container) {
+    if(currentUser.role !== 'owner') { container.innerHTML = `<div class="card">Only owner can manage expenses.</div>`; return; }
+    let html = `<div class="card"><h3>➕ Add Expense</h3><input type="text" id="expCat" placeholder="Category (Transport, Fuel, Rent...)"><input type="number" id="expAmount" placeholder="Amount (₦)"><input type="text" id="expNote" placeholder="Note"><button id="addExpenseBtn">Record Expense</button></div>
+      <div class="card"><h3>📆 Expense History</h3><div class="table-container"><table>${appData.expenses.slice().reverse().map(e=>`<tr><td>${new Date(e.date).toLocaleDateString()}</td><td>${e.category}</td><td>${formatNgn(e.amount)}</td><td>${e.note||''}</td></tr>`).join('')}</table></div></div>`;
+    container.innerHTML = html;
+    document.getElementById('addExpenseBtn')?.addEventListener('click',()=>{ let cat=document.getElementById('expCat').value, amt=parseFloat(document.getElementById('expAmount').value), note=document.getElementById('expNote').value; if(cat && amt>0){ addExpense({id:'e'+Date.now(), date:new Date().toISOString(), category:cat, amount:amt, note}); renderPage(); } else alert("Fill category and amount"); });
+  }
+  
+  function renderReports(container) {
+    let now = new Date();
+    let weeklySales = appData.sales.filter(s=> new Date(s.date) > new Date(now.getTime()-7*86400000)).reduce((a,b)=>a+b.totalAmount,0);
+    let monthlySales = appData.sales.filter(s=> new Date(s.date).getMonth()===now.getMonth()).reduce((a,b)=>a+b.totalAmount,0);
+    let totalExpensesMonth = appData.expenses.filter(e=> new Date(e.date).getMonth()===now.getMonth()).reduce((a,b)=>a+b.amount,0);
+    let monthlyProfit = appData.sales.filter(s=> new Date(s.date).getMonth()===now.getMonth()).reduce((a,b)=>a+(b.profit||0),0) - totalExpensesMonth;
+    let html = `<div class="card"><h3>📊 Profit & Sales Summary</h3>
+      <div><strong>Weekly Revenue:</strong> ${formatNgn(weeklySales)}</div>
+      <div><strong>Monthly Revenue:</strong> ${formatNgn(monthlySales)}</div>
+      <div><strong>Monthly Expenses:</strong> ${formatNgn(totalExpensesMonth)}</div>
+      <div><strong>Monthly Net Profit:</strong> <span class="profit-text">${formatNgn(monthlyProfit)}</span></div>
+      <hr><button id="exportExcelBtn" class="secondary">📎 Export Sales to Excel (CSV)</button>
+      <button id="backupDataBtn" class="secondary">💾 Backup (Download JSON)</button>
+      <input type="file" id="restoreFile" accept=".json" style="display:none"><button id="restoreBtn" class="secondary">↩️ Restore Backup</button>
+      </div><div class="card"><canvas id="profitChart" height="180"></canvas></div>`;
+    container.innerHTML = html;
+    // simple chart
+    let last7days = [...Array(7)].map((_,i)=>{ let d=new Date(); d.setDate(d.getDate()-i); return d.toISOString().split('T')[0]; }).reverse();
+    let profits = last7days.map(day=> appData.sales.filter(s=> s.date.split('T')[0]===day).reduce((sum,s)=>sum+(s.profit||0),0) - appData.expenses.filter(e=>e.date.split('T')[0]===day).reduce((a,b)=>a+b.amount,0));
+    if(profitChart) profitChart.destroy();
+    const ctx = document.getElementById('profitChart')?.getContext('2d');
+    if(ctx) profitChart = new Chart(ctx, { type:'line', data:{ labels:last7days.map(d=>d.slice(5)), datasets:[{label:'Daily Net Profit (₦)', data:profits, borderColor:'#f57c00', tension:0.2}] } });
+    document.getElementById('exportExcelBtn')?.addEventListener('click',()=>{ let csvRows=[["Date","Customer","Kg","Amount","Profit"]]; appData.sales.forEach(s=>{ csvRows.push([s.date.split('T')[0], s.customerName, s.quantityKg, s.totalAmount, s.profit]); }); let csv=csvRows.map(r=>r.join(",")).join("\n"); let blob=new Blob([csv],{type:"text/csv"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="gas_sales.csv"; a.click(); });
+    document.getElementById('backupDataBtn')?.addEventListener('click',()=>{ let dataStr=JSON.stringify(appData); let blob=new Blob([dataStr],{type:"application/json"}); let a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="gasflow_backup.json"; a.click(); });
+    document.getElementById('restoreBtn')?.addEventListener('click',()=>{ let input=document.getElementById('restoreFile'); input.click(); input.onchange=e=>{ let file=e.target.files[0]; let reader=new FileReader(); reader.onload=ev=>{ let restored=JSON.parse(ev.target.result); if(restored) { localStorage.setItem('gasflow_ng_data', JSON.stringify(restored)); alert("Restored! Reloading."); location.reload(); } }; reader.readAsText(file); }; });
+  }
+  
+  // login logic
+  document.getElementById('loginBtn')?.addEventListener('click', () => {
+    let user = document.getElementById('loginUsername').value;
+    let pass = document.getElementById('loginPassword').value;
+    if(user === 'owner' && pass === 'owner123') { currentUser = { username:'owner', role:'owner' }; showApp(); }
+    else if(user === 'staff' && pass === 'staff123') { currentUser = { username:'staff', role:'staff' }; showApp(); }
+    else alert("Invalid credentials");
+  });
+  function showApp() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('roleBadge').innerText = currentUser.role.toUpperCase();
+    loadData();
+    renderPage();
+  }
+  document.getElementById('logoutBtn')?.addEventListener('click',()=>{ localStorage.clear(); location.reload(); });
+  document.getElementById('darkModeToggle')?.addEventListener('click',()=>{ document.body.classList.toggle('dark'); });
+  document.querySelectorAll('.nav-item').forEach(el=>{ el.addEventListener('click',()=>{ currentPage = el.dataset.page; renderPage(); }); });
+  // expose render to global
+  window.renderPage = renderPage;
+</script>
+</body>
+</html>
